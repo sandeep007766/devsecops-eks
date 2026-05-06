@@ -1,0 +1,59 @@
+name: DevSecOps CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-scan-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        working-directory: app/app
+        run: npm install
+
+      # ---------------- SECURITY SCAN (SNYK) ----------------
+      - name: Snyk Security Scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: test
+
+      # ---------------- DOCKER BUILD ----------------
+      - name: Build Docker Image
+        run: docker build -t devsecops-app:latest app/app
+
+      # ---------------- TRIVY SCAN ----------------
+      - name: Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: devsecops-app:latest
+          format: json
+          output: trivy-report.json
+
+      # ---------------- AWS CONFIG (for EKS deploy) ----------------
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+
+      # ---------------- UPDATE KUBECONFIG ----------------
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --name devsecops-cluster --region eu-north-1
+
+      # ---------------- DEPLOY TO EKS ----------------
+      - name: Deploy to EKS
+        run: |
+          kubectl apply -f k8s/
