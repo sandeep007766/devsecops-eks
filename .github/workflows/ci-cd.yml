@@ -38,7 +38,6 @@ jobs:
 
       # ---------------- DOCKER BUILD ----------------
       - name: Build Docker Image
-        working-directory: devsecops-eks
         run:  docker build -t $ECR_REPOSITORY:latest .
 
       # ---------------- TRIVY ----------------
