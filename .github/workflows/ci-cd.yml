@@ -38,7 +38,7 @@ jobs:
 
       # ---------------- DOCKER BUILD ----------------
       - name: Build Docker Image
-        run:  docker build -t $ECR_REPOSITORY:latest .
+        run:  docker build -t $ECR_REPOSITORY:latest ./devsecops-eks
 
       # ---------------- TRIVY ----------------
       - name: Trivy Scan
