@@ -1,0 +1,27 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# AWS credentials (CRITICAL)
+.aws/
+aws-credentials
+credentials
+
+# Node
+node_modules/
+
+# Snyk / security caches
+.cache/
+snyk*
+
+# Trivy DB
+trivy.db
+*.db
+
+# OS
+.DS_Store
+
+# Logs
+*.log
