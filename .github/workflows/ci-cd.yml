@@ -26,12 +26,15 @@ jobs:
         run: npm install
 
       # ---------------- SNYK ----------------
-      - name: Snyk Security Scan
-        uses: snyk/actions/node@master
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      - name: Run Snyk Security Scan
+        run: |
+          cd app/app
+          snyk test --severity-threshold=high --debug
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: test
 
       # ---------------- DOCKER BUILD ----------------
       - name: Build Docker Image
